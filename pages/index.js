@@ -40,17 +40,13 @@ export default function Home() {
             Address: {userAddress}
           </p>
           :
-          <a onClick={connect} 
-          style={{
-            borderColor:'black',
-            borderWidth: '3'
-          }}>
-            <p>Connect</p>
-          </a>
+          <button className={styles.moveBtn} onClick={connect}>
+            <p className={styles.moveText}>Connect</p>
+          </button>
         }
         </p>
         <div className={styles.grid}>
-          <Card link={'/chat'} title={'Chat APP'} description={'Using Metamask Accounts, Enjoy Chat'}></Card>
+          <Card link={'/chat'} title={'Chat APP'} description={'Using Metamask Accounts, Enjoy Chat'} address={userAddress}></Card>
         </div>
       </main>
 
