@@ -14,7 +14,7 @@ const Main = styled.div`
 `;
 
 const Head = styled.div`
-    
+    flex-direction: column;
 `;
 
 const Log = styled.div`
@@ -31,12 +31,11 @@ const Input = styled.div`
     margin-top: 20px;
     width: 100%;
     min-height: 30px;
-    border: solid;
     flex-direction: row;
     alignItems:'center';
     justifyContent:'center';
     .inputBox {
-        background-color: red;
+        // background-color: red;
         width:90%;
         height:100%;
     }
