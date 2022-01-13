@@ -1,6 +1,7 @@
 
 import React from 'react';
 import Message from './Message';
+
 const Messages = ({...props}) => {
     return(
         <div>
@@ -13,7 +14,7 @@ const Messages = ({...props}) => {
                             <text>{msg.message}</text>
                         </div>
                         :
-                        <Message message={msg.message} />
+                        <Message messageItem={msg.message} />
                     }
                 </div>
             ))
