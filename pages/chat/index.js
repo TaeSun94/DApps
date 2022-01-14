@@ -38,6 +38,7 @@ export default function Chat({}){
     
     useEffect(()=>{
         socket.on("onReceive",(msg)=>{
+            console.log(msg);
             setMessages(messages => [...messages, {message: msg, type: 1}]);
         });
 
@@ -51,7 +52,7 @@ export default function Chat({}){
     },[])
 
     const sendMessage = () => {
-        socket.emit("onSend",message);
+        socket.emit("onSend",{message: message,user:userId});
         setMessage("");
     }
 
@@ -59,7 +60,9 @@ export default function Chat({}){
         socket.emit('disConnect',{userName: userId});
         router.push('/');
     }
-
+    const handler = ({data}) => {
+        console.log(data)
+    };
     return (
         <Styled.Container>
             <Head>
@@ -73,7 +76,7 @@ export default function Chat({}){
                 </Styled.Head>
                 <Styled.Log>
                 {/* 중간 채팅 구간 */}
-                <Messages messages={messages}/>
+                <Messages handlerMessage={handler} messages={messages}/>
                 </Styled.Log>
                 <Styled.Input>
                         <input className='inputBox' value={message} onChange={({target:{value}})=>{setMessage(value)}} />
