@@ -3,7 +3,6 @@ import styled from 'styled-components';
 
 const Container = styled.div`
     margin: 60px;
-    flex-direction: 'colunm';
 `;
 
 const Main = styled.div`
@@ -11,10 +10,12 @@ const Main = styled.div`
     padding: 4rem 0;
     flex-direction: column;
     align-items: center;
+    min-width: 400px;
 `;
 
 const Head = styled.div`
-    flex-direction: column;
+    display: flex;
+    justify-content: space-between;
 `;
 
 const Log = styled.div`
@@ -28,19 +29,33 @@ const Log = styled.div`
 `;
 
 const Input = styled.div`
+    display: flex;
     margin-top: 20px;
-    width: 100%;
     min-height: 30px;
     flex-direction: row;
-    alignItems:'center';
-    justifyContent:'center';
-    .inputBox {
-        // background-color: red;
-        width:90%;
-        height:100%;
+    align-items:'center';
+    justify-content: space-between;
+
+    .inputBox{
+        width:80%;
     }
     .submitBtn{
-        backgroundColor: white;
+        width: 15%;
+    }
+    @media screen and (max-width: 540px){
+        .submitBtn{
+            width: 19%;
+        }
     }
 `;
-export default {Container, Main, Log, Input, Head};
+
+const Btn = styled.button`
+    border: none;
+    background-color: white;
+    text-align: center;
+    font-size: 18px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #4CAF50;
+`;
+export default {Container, Main, Log, Input, Head, Btn};
