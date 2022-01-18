@@ -1,11 +1,11 @@
 
 import React, { useEffect, useRef, useState } from 'react';
-import Modal from '../../components/Modal';
 import Styled from './chatStyle';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Messages from '../../components/Messages';
 import io from 'socket.io-client';
+import Modal from '../../components/Modal';
 const socket = io.connect("http://localhost:3002");
 
 export default function Chat({}){
@@ -14,6 +14,10 @@ export default function Chat({}){
     const [userId, setUserId] = useState(userAddress.slice(0,6)+"..."+userAddress.slice(userAddress.length-4,userAddress.length));
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState([]);
+    const [isModal, setIsModal] = useState(false);
+    const [mintData, setMintData] = useState([]);
+    const handleModalShow = () => setIsModal(true);
+    const handleModalClose = () => setIsModal(false);
     //채팅 시작 전 socket server와 연동하기 위한 hook 한번만 실행
     useEffect(()=>{
         socket.emit("init",{name: userAddress});
@@ -38,7 +42,6 @@ export default function Chat({}){
     
     useEffect(()=>{
         socket.on("onReceive",(msg)=>{
-            console.log(msg);
             setMessages(messages => [...messages, {message: msg, type: 1}]);
         });
 
@@ -48,20 +51,22 @@ export default function Chat({}){
         
         socket.on("onDisconnect",(msg)=>{
             setMessages(messages=>[...messages,{message: msg, type: 0}]);
-        })
+        });
     },[])
 
     const sendMessage = () => {
-        socket.emit("onSend",{message: message,user:userId});
+        socket.emit("onSend",{message: message,user:userId, originAddress:userAddress});
         setMessage("");
     }
-
     const disConnect = () => {
         socket.emit('disConnect',{userName: userId});
         router.push('/');
     }
-    const handler = ({data}) => {
-        console.log(data)
+    //minting 관련 Modal 생성
+    const handler = (data) => {
+        console.log(data);
+        setMintData(data);
+        handleModalShow();
     };
     return (
         <Styled.Container>
@@ -71,20 +76,26 @@ export default function Chat({}){
             </Head>
             <Styled.Main>
                 <Styled.Head>
-                    <p style={{alignContents: 'center'}}> User : {userId}</p>
-                    <button onClick={disConnect}>Disconnect</button>
+                    <p> User : {userId}</p>
+                    <Styled.Btn onClick={disConnect}>Disconnect</Styled.Btn>
                 </Styled.Head>
                 <Styled.Log>
                 {/* 중간 채팅 구간 */}
-                <Messages handlerMessage={handler} messages={messages}/>
+                <Messages handlerMessage={handler} messages={messages} userInfo={{
+                    userId: userId,
+                    userAddress: userAddress
+                }}/>
                 </Styled.Log>
                 <Styled.Input>
-                        <input className='inputBox' value={message} onChange={({target:{value}})=>{setMessage(value)}} />
-                        <button className='submitBtn' style={{alignItems:'center',justifyContent:'center'}}
-                        onClick={sendMessage} disabled={message.length===0}
-                        >입력하기</button>
+                        <input className='inputBox' value={message} onChange={({target:{value}})=>{setMessage(value)}} onKeyPress={(e)=>{
+                            if(e.key === 'Enter'){
+                                sendMessage();
+                            }
+                        }}/>
+                        <button className='submitBtn' onClick={sendMessage} disabled={message.length===0}>입력하기</button>
                 </Styled.Input>
             </Styled.Main>
+            <Modal visible={isModal} onClose={handleModalClose} closable info={mintData}>Hello</Modal>
         </Styled.Container>
     );
 }

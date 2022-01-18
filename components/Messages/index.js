@@ -3,6 +3,11 @@ import React from 'react';
 import Message from './Message';
 
 const Messages = ({...props}) => {
+    const[userId, setUserId] = React.useState(props.userInfo.userId);
+    const[userAddress, setUserAddress] = React.useState(props.userInfo.userAddress);
+    const handleMint = (messageItem) => {
+        props.handlerMessage(messageItem);
+    }
     return(
         <div>
         {
@@ -14,7 +19,7 @@ const Messages = ({...props}) => {
                             <text>{msg.message}</text>
                         </div>
                         :
-                        <Message messageItem={msg.message} />
+                        <Message messageItem={msg.message} own={msg.message.user === userId ? true: false} mint={handleMint}/>
                     }
                 </div>
             ))
