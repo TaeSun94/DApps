@@ -28,11 +28,10 @@ export default function Chat({}){
     useEffect(()=>{
         setUserId(userAddress.slice(0,6)+"..."+userAddress.slice(userAddress.length-4,userAddress.length))
     },[userAddress]);
-
+    
     //account의 변경을 통해 address를 바꿔주기 위한 hook
     useEffect(()=>{
         ethereum.on('accountsChanged', (accounts)=>{
-            console.log(accounts);
             if(accounts.length>0)
                 setUserAddress(accounts[0]);
             else
@@ -64,8 +63,14 @@ export default function Chat({}){
     }
     //minting 관련 Modal 생성
     const handler = (data) => {
-        console.log(data);
-        setMintData(data);
+        const item = {
+            message: data.message,
+            user: userId,
+            owner: data.user,
+            originAddress: data.originAddress,
+            userAddress: userAddress
+        }
+        setMintData(item);
         handleModalShow();
     };
     return (

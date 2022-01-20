@@ -6,7 +6,7 @@ import Card from '../components/Card';
 
 export default function Home() {
   const [userAddress, setUserAddress] = React.useState("");
-
+  const [isNet, setIsNet] = React.useState(false);
   //Metamask와 연결하기 위한 JSON-RPC API
   //권한을 부여한 뒤 연결.
   async function connect(){
@@ -18,10 +18,22 @@ export default function Home() {
       method: 'wallet_requestPermissions',
       params: [{ eth_accounts:{}}]
     }).then((permissions)=>{
-      console.log(permissions);
       setUserAddress(permissions[0].caveats[1].value[0]);
     });
   }
+
+  if(userAddress.length > 0){
+    ethereum.request({
+      "method": "net_version",
+    "params": [],
+    "id": 0
+    }).then((res)=>{
+      if(res !== 4+""){
+        alert("Change Network to Rinkeby!");
+      }
+    })
+  }
+
 
   //account의 변화를 감지하고 해당 account로 address를 변경해주는 Hook
   useEffect(()=>{
@@ -45,8 +57,8 @@ export default function Home() {
         </h1>
 
         <p className={styles.description}>
-          Get started by Add card in{' '}
-          <code className={styles.code}>pages/index.js</code>
+          Network :{'   '}
+          <code className={styles.code}>Rinkeby Test Network</code>
           <br/><br />
           {/* MetamaskConnect */}
         {
