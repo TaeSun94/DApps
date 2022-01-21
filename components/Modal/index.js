@@ -1,6 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
-
+import { useRouter } from 'next/router';
+import web3 from "web3";
+import meta from '../../util/metadata';
+import detectEthereumProvider from "@metamask/detect-provider";
+const contract = require('../../contract/MSGN.json');
+const contractAddress = "0xc70Eb49FFe45d87081d3934069C475Bd5BC87D25"
 const Modal = ({
   className,
   onClose,
@@ -11,11 +16,35 @@ const Modal = ({
   children,
   info
 }) => {
-  const [owner, setOwner] = useState("");
+  // async function loadWeb3(){
+  //   if(window.ethereum){
+  //     var Web3 = new web3(window.ethereum);
+  //     window.ethereum.enable();
+  //   }
+  // }
+
+  // async function loadContract(){
+  //   var Web3 = new web3(window.ethereum);
+  //   var MyContract = new Web3.eth.Contract(contract.abi,"0xc70Eb49FFe45d87081d3934069C475Bd5BC87D25");
+  //   // var MyCon = new Web3.eth.Contract(contract.abi,'0xc70Eb49FFe45d87081d3934069C475Bd5BC87D25');
+  //   console.log(MyContract);
+  // }
+
+  // async function load(){
+  //   await loadWeb3();
+  //   await loadContract();
+  // }
+
+  const router = useRouter();
+  const [infoModal, setInfoModal] = useState(true);
+  const [mintModal, setMintModal] = useState(true);
+  
+  const [myContract, setMyContract] = useState();
   useEffect(()=>{
-    setOwner(info.originAddress.slice(0,6)+"..."+info.originAddress.slice(info.originAddress.length-4,info.originAddress.length));
-    console.log(1)
-  });
+    var Web3 = new web3(window.ethereum);
+    setMyContract(new Web3.eth.Contract(contract.abi,contractAddress));
+  },[]);
+
   useEffect(() => {
     document.body.style.cssText = `position: fixed; top: -${window.scrollY}px`
   return () => {
@@ -24,6 +53,7 @@ const Modal = ({
     window.scrollTo(0, parseInt(scrollY || '0') * -1)
   }
 }, []);
+
   const onMaskClick = (e) => {
     if (e.target === e.currentTarget) {
       onClose(e)
@@ -35,20 +65,31 @@ const Modal = ({
       onClose(e)
     }
   }
+
+  async function mintNFT(tokenInfo){
+    console.log(tokenInfo);
+    console.log(myContract.methods);
+    const tx = {
+      from: info.userAddress,
+      to: contractAddress,
+      gas: `500000`,
+      data: myContract.methods.mintNFT(info.userAddress, tokenInfo).encodeABI(),
+    }
+  
+    const txHash = await window.ethereum.request({
+      method: 'eth_sendTransaction',
+      params: [tx],
+    });
+    console.log(txHash);
+    close();
+  }
+
+  const mint = (e) =>{
+    var data = meta.makeMeta(info.message);
+    mintNFT(data);
+  }
   return (
     <>
-      {/* <ModalOverlay visible={visible} />
-      <ModalWrapper
-        className={className}
-        onClick={maskClosable ? onMaskClick : null}
-        tabIndex="-1"
-        visible={visible}
-      >
-        <ModalInner tabIndex="0" className="modal-inner">
-          {closable && <button className="modal-close" onClick={close} />}
-          {children}
-        </ModalInner>
-      </ModalWrapper> */}
       <ModalOverlay visible={visible} />
       <ModalWrapper
         className={className}
@@ -65,7 +106,7 @@ const Modal = ({
               <h3>
                 Owner
               </h3>
-              <text>{owner}</text>
+              <text>{info.owner}</text>
             </div>
             <div style={{flexDirection:'row'}}>
               <h3>
@@ -83,7 +124,7 @@ const Modal = ({
             </div>
           </Contents>
           <Footer>
-            <Btn>Mint</Btn><Btn onClick={onClose}>Cancel</Btn>
+            <Btn onClick={mint}>Mint</Btn><Btn onClick={close}>Cancel</Btn>
           </Footer>
         </ModalInner>
       </ModalWrapper>
