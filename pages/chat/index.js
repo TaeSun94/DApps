@@ -6,8 +6,14 @@ import Head from 'next/head';
 import Messages from '../../components/Messages';
 import io from 'socket.io-client';
 import Modal from '../../components/Modal';
-const socket = io.connect("http://localhost:3002");
+import ItemList from '../../components/ItemList';
+import { contextMenu, Menu, Item } from 'react-contexify';
+import web3 from 'web3';
+const contract = require('../../contract/artifacts/MessageNFT.json');
+const contractAddress = "0x9C8714E01C64d0ebB5F70C72DDb61AF971aa6F31";
 
+const socket = io.connect("http://localhost:3002");
+const menuId = "NFT List"
 export default function Chat({}){
     const router = useRouter();
     const [userAddress, setUserAddress] = useState(router.query.address);
@@ -18,11 +24,56 @@ export default function Chat({}){
     const [mintData, setMintData] = useState([]);
     const handleModalShow = () => setIsModal(true);
     const handleModalClose = () => setIsModal(false);
+    const [myContract,setMyContract] = useState();
+    const [myNFT,setMyNFT] = useState([]);
+    const [isCallNFT, setIsCallNFT] = useState(false);
+    
+    //NFT List Modal
+    const [isNFTListModal, setIsNFTListModal] = useState(false);
+    const handleNFTListModalShow = () => setIsNFTListModal(true);
+    const handleNFTListModalClose = () => setIsNFTListModal(false);
+
+
     //채팅 시작 전 socket server와 연동하기 위한 hook 한번만 실행
     useEffect(()=>{
         socket.emit("init",{name: userAddress});
-        socket.emit("join",{roomName:"All", userName:userId})
+        socket.emit("join",{roomName:"All", userName:userId});
+        var Web3 = new web3(window.ethereum);
+        setMyContract(new Web3.eth.Contract(contract.abi,contractAddress));
     },[]);
+
+    async function setNFT(){
+        myContract.methods.totalSupply().call({from: contractAddress}, (err,res)=>{
+            console.log("total: "+res);
+            getOwner(res);
+        })
+        setIsCallNFT(true);
+    }
+
+    async function getOwner(total){
+        for(let i = 0; i < total; i++){
+            console.log(i);
+            myContract.methods.ownerOf(i).call({from:contractAddress},(err,res)=>{
+                console.log("ownerOf: "+res+"  ---   "+userAddress)
+                if(res.localeCompare(userAddress)){
+                    pushList(i);
+                }
+            })
+        }
+    }
+
+    async function pushList(i){
+        myContract.methods.tokenURI(i).call({from:contractAddress},(err, res)=>{
+            console.log("tokenURI: "+res);
+            if(res.length>0){
+                console.log(res);
+                var data = JSON.parse(res);
+                console.log(data);
+                setMyNFT([...myNFT, data.data]);
+                // myNFT.push(data.data);
+            }
+        })
+    }
 
     //Account의 address가 길어 이를 15글자로 표현.
     useEffect(()=>{
@@ -52,7 +103,9 @@ export default function Chat({}){
             setMessages(messages=>[...messages,{message: msg, type: 0}]);
         });
     },[])
-
+    const checkNFT= () => {
+        console.log(myNFT);
+    }
     const sendMessage = () => {
         socket.emit("onSend",{message: message,user:userId, originAddress:userAddress});
         setMessage("");
@@ -73,6 +126,19 @@ export default function Chat({}){
         setMintData(item);
         handleModalShow();
     };
+
+    const handlerRight = e => {
+        e.preventDefault();
+        contextMenu.show({
+            id: menuId,
+            event: e,
+        })
+    }
+
+    const showNFT = () => {
+
+    }
+    
     return (
         <Styled.Container>
             <Head>
@@ -91,16 +157,41 @@ export default function Chat({}){
                     userAddress: userAddress
                 }}/>
                 </Styled.Log>
+                
+                <Modal visible={isModal} onClose={handleModalClose} closable info={mintData}/>
+                <ItemList />
                 <Styled.Input>
-                        <input className='inputBox' value={message} onChange={({target:{value}})=>{setMessage(value)}} onKeyPress={(e)=>{
-                            if(e.key === 'Enter'){
-                                sendMessage();
-                            }
-                        }}/>
-                        <button className='submitBtn' onClick={sendMessage} disabled={message.length===0}>입력하기</button>
+                    <img className='btnImg' src='plusBtn.png' onClick={handlerRight}/>                    
+                    <input className='inputBox' value={message} onChange={({target:{value}})=>{setMessage(value)}} onKeyPress={(e)=>{
+                        if(e.key === 'Enter'){
+                            sendMessage();
+                        }
+                    }}/>
+                    <button className='submitBtn' onClick={sendMessage} disabled={message.length===0}>입력하기</button>
                 </Styled.Input>
+                {
+                    !isCallNFT ?
+                    <Menu id={menuId}>
+                        <Item onClick={setNFT}>
+                            NFT가져오기
+                        </Item>
+                    </Menu>
+                    :
+                    <Menu id={menuId}>
+                        {
+                            myNFT.length > 0 ?
+                            <Item onClick={handleNFTListModalShow}>
+                                NFT목록
+                            </Item>
+                            :
+                            <Item disabled>
+                                발급한 NFT가 없습니다.
+                            </Item>
+                        }
+                    </Menu>
+                }
+                <ItemList visible={isNFTListModal} onClose={handleNFTListModalClose} closable data={myNFT}/>
             </Styled.Main>
-            <Modal visible={isModal} onClose={handleModalClose} closable info={mintData}>Hello</Modal>
         </Styled.Container>
     );
 }
