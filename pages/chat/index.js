@@ -58,7 +58,7 @@ export default function Chat({}){
                 if(res.localeCompare(userAddress)){
                     pushList(i);
                 }
-            })
+            });
         }
     }
 
@@ -69,7 +69,7 @@ export default function Chat({}){
                 console.log(res);
                 var data = JSON.parse(res);
                 console.log(data);
-                setMyNFT([...myNFT, data.data]);
+                setMyNFT(myNFT =>[...myNFT, data.data]);
                 // myNFT.push(data.data);
             }
         })
@@ -102,10 +102,8 @@ export default function Chat({}){
         socket.on("onDisconnect",(msg)=>{
             setMessages(messages=>[...messages,{message: msg, type: 0}]);
         });
-    },[])
-    const checkNFT= () => {
-        console.log(myNFT);
-    }
+    },[]);
+
     const sendMessage = () => {
         socket.emit("onSend",{message: message,user:userId, originAddress:userAddress});
         setMessage("");
@@ -135,9 +133,10 @@ export default function Chat({}){
         })
     }
 
-    const showNFT = () => {
-
-    }
+    // const showNFT = () => {
+    //     console.log(myNFT.length);
+    //     console.log(myNFT);
+    // }
     
     return (
         <Styled.Container>
@@ -159,7 +158,6 @@ export default function Chat({}){
                 </Styled.Log>
                 
                 <Modal visible={isModal} onClose={handleModalClose} closable info={mintData}/>
-                <ItemList />
                 <Styled.Input>
                     <img className='btnImg' src='plusBtn.png' onClick={handlerRight}/>                    
                     <input className='inputBox' value={message} onChange={({target:{value}})=>{setMessage(value)}} onKeyPress={(e)=>{
@@ -191,6 +189,7 @@ export default function Chat({}){
                     </Menu>
                 }
                 <ItemList visible={isNFTListModal} onClose={handleNFTListModalClose} closable data={myNFT}/>
+            {/* <button onClick={showNFT}>click</button> */}
             </Styled.Main>
         </Styled.Container>
     );
