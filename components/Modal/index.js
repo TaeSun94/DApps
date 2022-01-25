@@ -1,44 +1,18 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { useRouter } from 'next/router';
 import web3 from "web3";
 import meta from '../../util/metadata';
-import detectEthereumProvider from "@metamask/detect-provider";
-const contract = require('../../contract/MSGN.json');
-const contractAddress = "0xc70Eb49FFe45d87081d3934069C475Bd5BC87D25"
+const contract = require('../../contract/artifacts/MessageNFT.json');
+const contractAddress = "0x9C8714E01C64d0ebB5F70C72DDb61AF971aa6F31"
+
 const Modal = ({
   className,
   onClose,
   maskClosable,
   closable,
   visible,
-  title,
-  children,
   info
 }) => {
-  // async function loadWeb3(){
-  //   if(window.ethereum){
-  //     var Web3 = new web3(window.ethereum);
-  //     window.ethereum.enable();
-  //   }
-  // }
-
-  // async function loadContract(){
-  //   var Web3 = new web3(window.ethereum);
-  //   var MyContract = new Web3.eth.Contract(contract.abi,"0xc70Eb49FFe45d87081d3934069C475Bd5BC87D25");
-  //   // var MyCon = new Web3.eth.Contract(contract.abi,'0xc70Eb49FFe45d87081d3934069C475Bd5BC87D25');
-  //   console.log(MyContract);
-  // }
-
-  // async function load(){
-  //   await loadWeb3();
-  //   await loadContract();
-  // }
-
-  const router = useRouter();
-  const [infoModal, setInfoModal] = useState(true);
-  const [mintModal, setMintModal] = useState(true);
-  
   const [myContract, setMyContract] = useState();
   useEffect(()=>{
     var Web3 = new web3(window.ethereum);
@@ -67,15 +41,13 @@ const Modal = ({
   }
 
   async function mintNFT(tokenInfo){
-    console.log(tokenInfo);
-    console.log(myContract.methods);
     const tx = {
       from: info.userAddress,
       to: contractAddress,
-      gas: `500000`,
-      data: myContract.methods.mintNFT(info.userAddress, tokenInfo).encodeABI(),
+      gas: `300000`,
+      data: myContract.methods.safeMint(info.userAddress, JSON.stringify(tokenInfo)).encodeABI(),
     }
-  
+    console.log(tx.data)
     const txHash = await window.ethereum.request({
       method: 'eth_sendTransaction',
       params: [tx],
@@ -124,7 +96,8 @@ const Modal = ({
             </div>
           </Contents>
           <Footer>
-            <Btn onClick={mint}>Mint</Btn><Btn onClick={close}>Cancel</Btn>
+            <Btn onClick={mint}>Mint</Btn>
+            <Btn onClick={close}>Cancel</Btn>
           </Footer>
         </ModalInner>
       </ModalWrapper>
