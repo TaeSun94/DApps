@@ -1,12 +1,17 @@
 import Styled from './textCardStyle';
-
-const TextCard = ({...props}) => {
-
+import React, { useState } from 'react';
+const TextCard = ({isSelect, data, select, key}) => {
+    const [useSelect, setUseSelect] = useState(isSelect);
+    const use = () =>{
+        setUseSelect(!useSelect);
+    }
     return (
-        <Styled.Container>
-            <h3>
-                {props.data}
-            </h3>
+        <Styled.Container 
+        onClick={()=>{
+            use();
+            select(key);
+        }} isSelect={useSelect}>
+            {data}
         </Styled.Container>
     )
 }
