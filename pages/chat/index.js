@@ -55,7 +55,7 @@ export default function Chat({}){
             console.log(i);
             myContract.methods.ownerOf(i).call({from:contractAddress},(err,res)=>{
                 console.log("ownerOf: "+res+"  ---   "+userAddress)
-                if(res.localeCompare(userAddress)){
+                if(res !== undefined && res.localeCompare(userAddress)>=0){
                     pushList(i);
                 }
             });
@@ -133,11 +133,28 @@ export default function Chat({}){
         })
     }
 
-    // const showNFT = () => {
-    //     console.log(myNFT.length);
-    //     console.log(myNFT);
-    // }
-    
+    //민팅시 추가하는 로직을 처리해야하는데 Tx의 Pending상태의 NFT는 가져올 수 없으므로...
+    const handleNFTList = (tx) => {
+        // setMyNFT([]);
+        // setIsCallNFT(false);
+        console.log(tx);
+        var Web3 = new web3(window.ethereum);
+        Web3.eth.getTransaction(tx, (error,res)=>{
+            // console.log(res);
+            if(res !== null){
+                setMyNFT([]);
+                setIsCallNFT(false);
+            }
+        })
+    }
+
+    const handleSelect = (data) => {
+        setMessage(data);
+    }
+    const handleNFT = () => {
+        setMyNFT([]);
+        setNFT;
+    }
     return (
         <Styled.Container>
             <Head>
@@ -188,7 +205,7 @@ export default function Chat({}){
                         }
                     </Menu>
                 }
-                <ItemList visible={isNFTListModal} onClose={handleNFTListModalClose} closable data={myNFT}/>
+                <ItemList visible={isNFTListModal} onClose={handleNFTListModalClose} closable data={myNFT} onSelect={handleSelect} onReset={handleNFT}/>
             {/* <button onClick={showNFT}>click</button> */}
             </Styled.Main>
         </Styled.Container>
