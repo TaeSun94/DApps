@@ -18,6 +18,17 @@ You can start editing the page by modifying `pages/index.js`. The page auto-upda
 
 The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
 
+Secont, clone (Socket-server)[https://github.com/TaeSun94/Chat-APP-Socket-Server/blob/master/README.md]:
+And Run Socket-server
+### 1. npm install
+```bash
+npm install
+```
+### 2. run server
+```bash
+node app.js
+```
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
