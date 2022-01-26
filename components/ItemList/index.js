@@ -9,9 +9,13 @@ const ItemList = ({
     closable,
     visible,
     title,
-    data
+    data,
+    onSelect,
+    onReset
 }) => {
-    console.log("ItemList: "+ data);
+    const [isSelect, setIsSelect] = useState(0);
+    const [msgData, setMsgData] = useState("");
+    // console.log("ItemList: "+ data);
     useEffect(() => {
         document.body.style.cssText = `position: fixed; top: -${window.scrollY}px`
         return () => {
@@ -33,6 +37,12 @@ const ItemList = ({
         }
     }
 
+    const select = (e) => {
+        console.log("111".localeCompare("111"))
+        onSelect(msgData);
+        close();
+    }
+
     return(
         <>
             <Styled.Overlay visible={visible}/>
@@ -44,12 +54,20 @@ const ItemList = ({
                     <Styled.Contents>
                     {
                         data.map((msg,idx)=>(
-                            <TextCard key={idx} data={msg} />
+                            <Styled.Container onClick={()=>{
+                                // console.log(data[idx]);
+                                setIsSelect(idx);
+                                setMsgData(data[idx]);
+                            }} isSelect={isSelect === idx ? true : false} key={idx}>
+                                {msg}
+                            </Styled.Container>
                         ))
                     }
                     </Styled.Contents>
                     <Styled.Footer>
+                        <Styled.Btn onClick={select}>Select</Styled.Btn>
                         <Styled.Btn onClick={close}>Close</Styled.Btn>
+                        <Styled.Btn onClick={onReset}>Reset</Styled.Btn>
                     </Styled.Footer>
                 </Styled.Inner>
             </Styled.Wrapper>
